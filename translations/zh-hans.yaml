@@ -59,8 +59,8 @@ clusterNew:
       label: 交换机
       prompt: 选择交换机...
       required: 必须选择交换机
-    networkPlugin:
-      label: 网络插件
+    networkMode:
+      label: kube-proxy 代理模式
     containerCidr:
       label: Pod 网络 CIDR
       required: 必须输入Pod 网络 CIDR

@@ -152,13 +152,13 @@
         <div class="row">
           <div class="col span-6">
             <label class="acc-label">
-              {{t "clusterNew.aliyunkcs.networkPlugin.label"}}{{field-required}}
+              {{t "clusterNew.aliyunkcs.networkMode.label"}}{{field-required}}
             </label>
-            {{#input-or-display editable=(and (eq step 2) isNew) value=config.networkPlugin}}
+            {{#input-or-display editable=(and (eq step 2) isNew) value=config.networkMode}}
               {{new-select
                       classNames="form-control"
-                      content=networkPluginChoices
-                      value=config.networkPlugin
+                      content=networkModeChoices
+                      value=config.networkMode
               }}
             {{/input-or-display}}
           </div>

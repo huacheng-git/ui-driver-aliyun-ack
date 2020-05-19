@@ -59,8 +59,8 @@ clusterNew:
       label: VSwitch
       prompt: Choose VSwitch...
       required: VSwitch is required
-    networkPlugin:
-      label: Network Plug-in
+    networkMode:
+      label: Kube-Proxy Mode
     containerCidr:
       label: Pod CIDR Block
       required: Pod CIDR Block is required
