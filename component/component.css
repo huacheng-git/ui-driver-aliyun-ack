@@ -1,0 +1,4 @@
+.machine-driver.%%DRIVERNAME%% {
+  background-image: url('aliyunkcs.svg');
+  background-size: 60px 60px;
+}

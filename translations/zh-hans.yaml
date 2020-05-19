@@ -1,0 +1,113 @@
+clusterNew:
+  aliyunkcs:
+    label: 阿里云Kubernetes容器服务
+    shortLabel: Alibaba ACK
+    access:
+      next: '下一步: 配置集群'
+      loading: '从Alibaba ACK加载可用区域'
+      title: 帐户访问
+      detail: 选择将用于启动阿里巴巴Kubernetes服务的地区和API密钥
+    cluster:
+      title: 集群配置
+      detail: 选择将用于启动阿里巴巴Kubernetes服务的区域和Kubernetes版本
+      next: '下一步: 配置Master节点'
+      loading: '从Alibaba加载可用区域'
+    clusters:
+      k8s: 专有Kubernetes
+      managed: 托管Kubernetes
+      label: 集群类型
+    master:
+      title: Master 节点
+      detail: 配置用于启动阿里巴巴Kubernetes服务的主节点
+      next: '下一步: 配置Worker节点'
+      loading: '从阿里巴巴加载密钥对'
+    worker:
+      title: Worker 节点
+      detail: 配置用于启动阿里巴巴Kubernetes服务的工作节点
+    disk:
+      efficiency: 高效云盘
+      ssd: SSD 云盘
+      essd: ESSD 云盘
+    rootSize:
+      label: 根磁盘大小
+      placeholder: '例如: 120'
+    rootType:
+      label: 根磁盘类型
+    storageType:
+      label: 数据磁盘类型
+    storageSize:
+      label: 数据磁盘大小
+      placeholder: '例如: 120'
+    masterNum:
+      label: Master 节点数
+      help: 此Kubernetes集群将运行的Master节点数
+    numOfNodes:
+      label: Worker 节点数
+      placeholder: '例如: 3'
+      required: 必须设置Worker节点
+      help: 此Kubernetes集群将运行的Worker节点数
+    keyPair:
+      label: 密钥对
+      required: 必须选择密钥对
+    region:
+      label: 区域
+    vpcId:
+      label: 专有网络
+      prompt: 选择专有网络...
+      required: 必须选择专有网络
+    vswitchId:
+      label: 交换机
+      prompt: 选择交换机...
+      required: 必须选择交换机
+    networkPlugin:
+      label: 网络插件
+    containerCidr:
+      label: Pod 网络 CIDR
+      required: 必须输入Pod 网络 CIDR
+      invalid: Pod 网络 CIDR 网段格式不合法
+      placeholder: "请填写有效的私有网段，即以下网段及其子网：10.0.0.0/8，172.16-31.0.0/12-16，192.168.0.0/16"
+    serviceCidr:
+      label: Service CIDR
+      required: 必须输入Service CIDR
+      invalid: Service CIDR 网段不可选
+      placeholder: "可选范围：10.0.0.0/16-24，172.16-31.0.0/16-24，192.168.0.0/16-24"
+    nodeCidrMask:
+      label: 节点 IP 数量
+    snatEntry:
+      label: 配置 SNAT
+      placeholder: 为专有网络配置 SNAT
+    endpointPublicAccess:
+      label: 公网访问
+      placeholder: 使用 EIP 暴露 API Server
+    masterInstanceChargeType:
+      label: 付费类型
+      prePaid: 包年包月
+      postPaid: 按量付费
+    masterPeriod:
+      label: 购买时长
+      placeholder: 单位(月)
+    masterAutoRenew:
+      label: 自动续费
+      placeholder: 开启
+    masterAutoRenewPeriod:
+      label: 自动续费时长
+      placeholder: 单位(月)
+    osType:
+      label: 操作系统
+    accessKeyId:
+      label: 访问秘钥
+      placeholder: 请输入你的访问秘钥
+      required: 访问秘钥必须输入
+    accessKeySecret:
+      label: 访问秘钥令牌
+      placeholder: 请输入你的访问秘钥令牌
+      provided: Provided
+      required: 访问秘钥令牌必须输入
+    version:
+      label: Kubernetes版本
+    zoneId:
+      label: 可用区域
+      required: 可用区域必须设置
+    instanceType:
+      label: 实例类型
+      required: 实例类型必须设置
