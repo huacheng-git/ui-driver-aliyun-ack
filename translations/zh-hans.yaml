@@ -12,6 +12,8 @@ clusterNew:
       detail: 选择将用于启动阿里巴巴Kubernetes服务的区域和Kubernetes版本
       next: '下一步: 配置Master节点'
       loading: '从Alibaba加载可用区域'
+      name:
+        required: 集群名称必须输入
     clusters:
       k8s: 专有Kubernetes
       managed: 托管Kubernetes
