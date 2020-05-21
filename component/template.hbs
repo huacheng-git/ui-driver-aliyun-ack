@@ -559,13 +559,13 @@
         <div class="row">
           <div class="col span-6">
             <label class="acc-label">
-              {{t "clusterNew.aliyunkcs.osType.label"}}{{field-required}}
+              {{t "clusterNew.aliyunkcs.platform.label"}}{{field-required}}
             </label>
-            {{#input-or-display editable=(and (eq step 4) isNew) value=config.osType}}
+            {{#input-or-display editable=(and (eq step 4) isNew) value=config.platform}}
               {{new-select
                       classNames="form-control"
-                      content=osTypeChoices
-                      value=config.osType
+                      content=platformChoices
+                      value=config.platform
               }}
             {{/input-or-display}}
           </div>
