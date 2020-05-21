@@ -17,6 +17,7 @@ const setProperties= Ember.setProperties;
 const alias        = Ember.computed.alias;
 const service      = Ember.inject.service;
 const EmberPromise = Ember.RSVP.Promise;
+const all          = Ember.RSVP.all;
 const next         = Ember.run.next;
 const equal        = Ember.computed.equal;
 
@@ -322,7 +323,6 @@ export default Ember.Component.extend(ClusterDriver, {
 
       set(this, 'cluster.%%DRIVERNAME%%EngineConfig', config);
       set(this, 'config', config);
-      console.log(get(this, 'config'))
     }
   },
   /*!!!!!!!!!!!DO NOT CHANGE END!!!!!!!!!!!*/
@@ -423,22 +423,13 @@ export default Ember.Component.extend(ClusterDriver, {
 
         return;
       }
-      this.setInstances();
-
-      const instances = get(this, 'selectedZone.raw.AvailableInstanceTypes.InstanceTypes');
-
-      const found = instances.indexOf(get(this, 'config.masterInstanceType')) > -1;
-
-      if ( !found ) {
-        set(this, 'config.masterInstanceType', get(this, 'selectedZone.raw.AvailableInstanceTypes.InstanceTypes.firstObject'));
-      }
-
-      set(this, 'step', 3);
-      cb(true);
+      this.setInstances('master').then(() => {
+        set(this, 'step', 3);
+        cb(true);
+      });
     },
 
     configWorker(cb) {
-      this.setInstances();
       set(this, 'errors', null);
       const errors = [];
       const intl = get(this, 'intl');
@@ -456,27 +447,15 @@ export default Ember.Component.extend(ClusterDriver, {
         return;
       }
 
-      const instances = get(this, 'selectedZone.raw.AvailableInstanceTypes.InstanceTypes');
-      const found = instances.indexOf(get(this, 'config.workerInstanceType')) > -1;
-
-      if ( !found ) {
-        set(this, 'config.workerInstanceType', get(this, 'selectedZone.raw.AvailableInstanceTypes.InstanceTypes.firstObject'));
-      }
-
-      return this.fetch('KeyPair', 'KeyPairs', { RegionId: get(this, 'config.regionId') }).then((keyChoices) => {
-        set(this, 'keyChoices', keyChoices.map((item) => {
-          return {
-            label: item.raw.KeyPairName,
-            value: item.raw.KeyPairName
-          }
-        }));
-        if ( !get(this, 'config.keyPair') && get(this, 'keyChoices.length') ) {
-          set(this, 'config.keyPair', get(this, 'keyChoices.firstObject.value'));
-        }
+      all([
+        this.setInstances(),
+        this.setKeyPairs()
+      ]).then(() => {
         set(this, 'step', 4);
         cb(true);
       }).catch(() => {
-        cb(false);
+        cb();
+        return;
       });
     },
 
@@ -590,10 +569,10 @@ export default Ember.Component.extend(ClusterDriver, {
       if (!found) {
         set(this, 'config.zoneId', null);
       } else {
-        set(this, 'config.zoneId', found.raw.ZoneId)
+        set(this, 'config.zoneId', found.raw.ZoneId);
       }
     } else {
-      set(this, 'config.zoneId', null)
+      set(this, 'config.zoneId', null);
     }
   }),
 
@@ -609,6 +588,10 @@ export default Ember.Component.extend(ClusterDriver, {
     } else {
       set(this, 'config.kubernetesVersion', get(VERSIONS, 'firstObject.value'));
     }
+  }),
+
+  instanceChargeTypeDidChange: observer('config.masterInstanceChargeType', function() {
+    this.setInstances('master');
   }),
 
   minNumOfNodes: computed('config.clusterType', function() {
@@ -642,9 +625,9 @@ export default Ember.Component.extend(ClusterDriver, {
 
   osTypeChoices: computed('intl.locale', 'config.clusterType', function() {
     if (get(this, 'config.clusterType') === KUBERNETES) {
-      return OSTYPES.filter(item => get(item, 'managed') !== true)
+      return OSTYPES.filter(item => get(item, 'managed') !== true);
     } else {
-      return OSTYPES
+      return OSTYPES;
     }
   }),
 
@@ -666,18 +649,104 @@ export default Ember.Component.extend(ClusterDriver, {
     });
   },
 
-  setInstances() {
-    const instances = get(this, 'selectedZone.raw.AvailableInstanceTypes.InstanceTypes');
+  setInstances(type) {
+    const externalParams = {
+      RegionId: get(this, 'config.regionId'),
+    };
+    const prefix = type === 'master' ? 'master' : 'worker';
 
-    set(this, 'instanceChoices', instances.map((i) => {
-      const g = i.split('.')[1];
+    if (type === 'master') {
+      set(externalParams, 'InstanceChargeType', get(this, 'config.masterInstanceChargeType'));
+    }
 
-      return {
-        group: g,
-        label: i,
-        value: i
+    return new EmberPromise((resolve, reject) => {
+      this.fetch('InstanceType', 'InstanceTypes', externalParams)
+        .then((instanceTypes) => {
+          this.fetchAvailableResources().then((availableResources) => {
+            set(this, 'instanceChoices', instanceTypes.filter((instanceType) => availableResources.indexOf(instanceType.value) > -1).map((instanceType) => {
+              return {
+                group: instanceType.raw.InstanceTypeFamily,
+                value: instanceType.value,
+                label: `${ instanceType.raw.InstanceTypeId } ( ${ instanceType.raw.CpuCoreCount } ${ instanceType.raw.CpuCoreCount > 1 ? 'Cores' : 'Core' } ${ instanceType.raw.MemorySize }GB RAM )`,
+              };
+            }));
+
+            let instanceType;
+
+            if ( (get(this, 'instanceChoices').findBy('value', get(this, `config.${ prefix }InstanceType`))) ) {
+              instanceType = get(this, `config.${ prefix }InstanceType`);
+            } else {
+              instanceType = get(this, 'instanceChoices.firstObject.value');
+            }
+
+            set(this, `config.${ prefix }InstanceType`, instanceType);
+            resolve();
+          });
+        })
+        .catch((err) => {
+          const errors = get(this, 'errors') || [];
+
+          errors.pushObject(err.message || err);
+          set(this, 'errors', errors);
+          reject();
+          return;
+        });
+    });
+  },
+
+  setKeyPairs() {
+    this.fetch('KeyPair', 'KeyPairs', { RegionId: get(this, 'config.regionId') }).then((keyChoices) => {
+      set(this, 'keyChoices', keyChoices.map((item) => {
+        return {
+          label: item.raw.KeyPairName,
+          value: item.raw.KeyPairName
+        };
+      }));
+      if ( !get(this, 'config.keyPair') && get(this, 'keyChoices.length') ) {
+        set(this, 'config.keyPair', get(this, 'keyChoices.firstObject.value'));
       }
-    }));
+    }).catch(() => {
+      const errors = get(this, 'errors') || [];
+
+      errors.pushObject(err.message || err);
+      set(this, 'errors', errors);
+    });
+  },
+
+  fetchAvailableResources() {
+    const region = get(this, 'config.regionId');
+    const results = [];
+    const params = {
+      RegionId:           region,
+    };
+
+    if ( get(this, 'config.zoneId') ) {
+      params['ZoneId'] = get(this, 'config.zoneId');
+    }
+
+    return new EmberPromise((resolve, reject) => {
+      this.fetch('', 'AvailableResource', {
+        RegionId:             get(this, 'config.regionId'),
+        ZoneId:               get(this, 'config.zoneId'),
+        InstanceChargeType:   get(this, 'config.masterInstanceChargeType'),
+        DestinationResource: 'InstanceType'
+      }).then((res) => {
+        const zones = res['AvailableZones'];
+
+        zones.AvailableZone.forEach((zone) => {
+          zone['AvailableResources']['AvailableResource'].forEach((resource) => {
+            resource['SupportedResources']['SupportedResource'].forEach((support) => {
+              if ( support.Status === 'Available' && results.indexOf(support.Value) === -1 ) {
+                results.pushObject(support.Value);
+              }
+            });
+          });
+        });
+        resolve(results);
+      }).catch((err) => {
+        reject(err);
+      });
+    });
   },
 
   validatePodCIDR() {
@@ -697,16 +766,16 @@ export default Ember.Component.extend(ClusterDriver, {
 
     if (segmentSplit[0] === '172') {
       if (!(parseInt(segmentSplit[1]) >= 16 && parseInt(segmentSplit[1]) <= 31)) {
-        return false
+        return false;
       }
       if (!(segmentSplit[2] === '0' && segmentSplit[3] === '0')) {
-        return false
+        return false;
       }
       if (segmentSplit[1] === '16' && (parseInt(subnet) >= 12 && parseInt(subnet) <= 22)) {
-        return true
+        return true;
       }
       if (parseInt(segmentSplit[1]) > 16 && (parseInt(subnet) >= 16 && parseInt(subnet) <= 22)) {
-        return true
+        return true;
       }
     }
 
@@ -730,10 +799,10 @@ export default Ember.Component.extend(ClusterDriver, {
 
     if (segmentSplit[0] === '172') {
       if (!(parseInt(segmentSplit[1]) >= 16 && parseInt(segmentSplit[1]) <= 31)) {
-        return false
+        return false;
       }
       if (parseInt(subnet) >= 16 && parseInt(subnet) <= 24) {
-        return true
+        return true;
       }
     }
 
@@ -771,7 +840,7 @@ export default Ember.Component.extend(ClusterDriver, {
       url:     endpoint,
       method:  'POST',
       body:    this.getQueryParamsString(params)
-    }
+    };
 
     return new EmberPromise((resolve, reject) => {
       get(this, 'globalStore').rawRequest(req).then((res) => {
@@ -802,9 +871,9 @@ export default Ember.Component.extend(ClusterDriver, {
           resolve(results);
         }
       }).catch((err) => {
-        reject(err)
+        reject(err);
       });
-    })
+    });
   },
 
   getSignature(secretAccessKey, params) {
@@ -821,11 +890,11 @@ export default Ember.Component.extend(ClusterDriver, {
 
     return keys.map((key) => {
       if (params[key] === undefined) {
-        return ''
+        return '';
       }
 
-      return `${ key }${ deep ? encodeURIComponent('=') : '=' }${ encodeURIComponent(params[key]) }`
-    }).join(deep ? encodeURIComponent('&') : '&')
+      return `${ key }${ deep ? encodeURIComponent('=') : '=' }${ encodeURIComponent(params[key]) }`;
+    }).join(deep ? encodeURIComponent('&') : '&');
   },
 
   // Any computed properties or custom logic can go here
