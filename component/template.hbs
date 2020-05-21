@@ -152,13 +152,13 @@
         <div class="row">
           <div class="col span-6">
             <label class="acc-label">
-              {{t "clusterNew.aliyunkcs.networkMode.label"}}{{field-required}}
+              {{t "clusterNew.aliyunkcs.proxyMode.label"}}{{field-required}}
             </label>
-            {{#input-or-display editable=(and (eq step 2) isNew) value=config.networkMode}}
+            {{#input-or-display editable=(and (eq step 2) isNew) value=config.proxyMode}}
               {{new-select
                       classNames="form-control"
-                      content=networkModeChoices
-                      value=config.networkMode
+                      content=proxyModeChoices
+                      value=config.proxyMode
               }}
             {{/input-or-display}}
           </div>
