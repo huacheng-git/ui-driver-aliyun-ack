@@ -29,7 +29,7 @@ const ENDPOINT = 'ecs.aliyuncs.com';
 const PAGE_SIZE = 50;
 const K8S_1_12_6 = '1.12.6-aliyun.1';
 const K8S_1_16_6 = '1.16.6-aliyun.1';
-const K8S_1_14_6 = '1.14.6-aliyun.1';
+const K8S_1_14_8 = '1.14.8-aliyun.1';
 
 const VERSIONS = [
   {
@@ -37,8 +37,8 @@ const VERSIONS = [
     label: K8S_1_12_6
   },
   {
-    value: K8S_1_14_6,
-    label: K8S_1_14_6
+    value: K8S_1_14_8,
+    label: K8S_1_14_8
   },
   {
     value: K8S_1_16_6,
