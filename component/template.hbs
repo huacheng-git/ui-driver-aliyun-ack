@@ -166,7 +166,7 @@
             <label class="acc-label">
               {{t "clusterNew.aliyunkcs.nodeCidrMask.label"}}
             </label>
-            {{#input-or-display editable=(and (eq step 2) isNew) value=config.nodeCidrMask}}
+            {{#input-or-display editable=(and (eq step 2) isNew) value=nodeCidrMaskShowValue}}
               {{new-select
                       classNames="form-control"
                       content=nodeCidrMaskChoices
@@ -396,7 +396,7 @@
             </label>
             {{#if (and (eq step 3) isNew)}}
               {{searchable-select class="form-control"
-                                  content=diskChoices
+                                  content=systemDiskChoices
                                   localizedLabel=true
                                   value=config.masterSystemDiskCategory
               }}
@@ -489,7 +489,7 @@
             }}
               {{searchable-select
                       class="form-control"
-                      content=diskChoices
+                      content=systemDiskChoices
                       localizedLabel=true
                       value=config.workerSystemDiskCategory
               }}
@@ -524,11 +524,11 @@
             </label>
             {{#input-or-display
                     editable=isNew
-                    value=config.workerSystemDiskCategory
+                    value=config.workerDataDiskCategory
             }}
               {{searchable-select
                       class="form-control"
-                      content=diskChoices
+                      content=dataDiskChoices
                       localizedLabel=true
                       value=config.workerDataDiskCategory
               }}

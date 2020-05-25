@@ -27,6 +27,8 @@ clusterNew:
       title: Worker 节点
       detail: 配置用于启动阿里巴巴Kubernetes服务的工作节点
     disk:
+      cloud: 普通云盘
+      ephemeralSsd: 本地SSD盘
       efficiency: 高效云盘
       ssd: SSD 云盘
       essd: ESSD 云盘

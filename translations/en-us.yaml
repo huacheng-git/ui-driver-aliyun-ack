@@ -27,6 +27,8 @@ clusterNew:
       title: Worker Nodes
       detail: Configure the worker nodes that will be used to launch Alibaba Kubernetes Service
     disk:
+      cloud: Ordinary Disk
+      ephemeralSsd: Local SSD Disk
       efficiency: Ultra Disk
       ssd: SSD Disk
       essd: ESSD Disk
