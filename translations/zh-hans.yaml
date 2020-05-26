@@ -96,7 +96,7 @@ clusterNew:
     masterAutoRenewPeriod:
       label: 自动续费时长
       placeholder: 单位(月)
-    osType:
+    platform:
       label: 操作系统
     accessKeyId:
       label: 访问秘钥

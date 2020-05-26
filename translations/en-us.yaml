@@ -96,7 +96,7 @@ clusterNew:
     masterAutoRenewPeriod:
       label: Auto Renewal Duration
       placeholder: Unit(Month)
-    osType:
+    platform:
       label: Operating System
     accessKeyId:
       label: Access Key
