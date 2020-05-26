@@ -63,18 +63,18 @@ clusterNew:
       label: 交换机
       prompt: 选择交换机...
       required: 必须选择交换机
-    networkMode:
+    proxyMode:
       label: kube-proxy 代理模式
     containerCidr:
       label: Pod 网络 CIDR
       required: 必须输入Pod 网络 CIDR
       invalid: Pod 网络 CIDR 网段格式不合法
-      placeholder: "请填写有效的私有网段，即以下网段及其子网：10.0.0.0/8，172.16-31.0.0/12-16，192.168.0.0/16"
+      placeholder: "请填写有效的私有网段，即以下网段及其子网：10.0.0.0/8，172.16-31.0.0/12-16，192.168.0.0/16。不能与VPC及VPC内已有kubernetes集群使用的网段重复"
     serviceCidr:
       label: Service CIDR
       required: 必须输入Service CIDR
       invalid: Service CIDR 网段不可选
-      placeholder: "可选范围：10.0.0.0/16-24，172.16-31.0.0/16-24，192.168.0.0/16-24"
+      placeholder: "可选范围：10.0.0.0/16-24，172.16-31.0.0/16-24，192.168.0.0/16-24。不能与VPC及VPC内已有kubernetes集群使用的网段重复"
     nodeCidrMask:
       label: 节点 IP 数量
     snatEntry:

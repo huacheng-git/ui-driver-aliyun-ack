@@ -63,18 +63,18 @@ clusterNew:
       label: VSwitch
       prompt: Choose VSwitch...
       required: VSwitch is required
-    networkMode:
+    proxyMode:
       label: Kube-Proxy Mode
     containerCidr:
       label: Pod CIDR Block
       required: Pod CIDR Block is required
       invalid: Pod CIDR Block is invalid
-      placeholder: "Specify a valid CIDR block that contains only internal IP addresses, namely one of the following CIDR blocks or their subnets: 10.0.0.0/8 172.16-31.0.0/12-16 and 192.168.0.0/16."
+      placeholder: "Specify a valid CIDR block that contains only internal IP addresses, namely one of the following CIDR blocks or their subnets: 10.0.0.0/8 172.16-31.0.0/12-16 and 192.168.0.0/16.Cannot be duplicated with the VPC and the network segment used by the existing kubernetes cluster in the VPC"
     serviceCidr:
       label: Service CIDR
       required: Service CIDR is required
       invalid: Service CIDR is invalid
-      placeholder: "Valid CIDR blocks include: 10.0.0.0/8 172.16-31.0.0/12-16 and 192.168.0.0/16."
+      placeholder: "Valid CIDR blocks include: 10.0.0.0/8 172.16-31.0.0/12-16 and 192.168.0.0/16.Cannot be duplicated with the VPC and the network segment used by the existing kubernetes cluster in the VPC"
     nodeCidrMask:
       label: IP Addresses per Node
     snatEntry:
