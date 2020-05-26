@@ -53,6 +53,9 @@ clusterNew:
     keyPair:
       label: 密钥对
       required: 必须选择密钥对
+    resourceGroup:
+      label: 资源组
+      all: 账号全部资源
     region:
       label: 区域
     vpcId:

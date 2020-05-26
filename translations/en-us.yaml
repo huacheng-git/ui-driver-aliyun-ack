@@ -53,6 +53,9 @@ clusterNew:
     keyPair:
       label: Key Pair
       required: Key Pair is required
+    resourceGroup:
+      label: Resource Group
+      all: Account's all Resources
     region:
       label: Region
     vpcId:

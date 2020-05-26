@@ -61,6 +61,23 @@
         <div class="row">
           <div class="col span-6">
             <label class="acc-label">
+              {{t "clusterNew.aliyunkcs.resourceGroup.label"}}
+            </label>
+            {{#input-or-display
+                    editable=(and isNew (eq step 2))
+                    value=resourceGroupId
+            }}
+              {{new-select
+                      class="form-control"
+                      content=resourceGroupChoices
+                      value=resourceGroupId
+              }}
+            {{/input-or-display}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col span-6">
+            <label class="acc-label">
               {{t "clusterNew.aliyunkcs.region.label"}}
             </label>
             {{#input-or-display
