@@ -405,7 +405,8 @@ export default Ember.Component.extend(ClusterDriver, {
         set(this, 'resourceGroups', groups.map((group) => {
           return {
             label: `${ group.raw.DisplayName } (${ group.raw.Id })`,
-            value: group.raw.Id
+            value: group.raw.Id,
+            raw: group.raw
           };
         }));
 
@@ -566,6 +567,22 @@ export default Ember.Component.extend(ClusterDriver, {
 
   }),
 
+  resourceGroupChoicesShouldChange: observer('intl.locale', 'resourceGroups', function() {
+    const intl    = get(this, 'intl');
+    let choices = get(this, 'resourceGroups').concat();
+
+    next(() => {
+      choices = choices.filter((item) => item.raw.Status === 'OK')
+
+      choices.unshift({
+        label: intl.t('clusterNew.aliyunkcs.resourceGroup.all'),
+        value: ''
+      });
+
+      set(this, 'resourceGroupChoices', choices);
+    })
+  }),
+
   resourceGroupIdDidChange: observer('resourceGroupId', function() {
     this.regionDidChange();
   }),
@@ -720,20 +737,6 @@ export default Ember.Component.extend(ClusterDriver, {
     return zoneChoices.findBy('value', get(this, 'config.zoneId'));
   }),
 
-  resourceGroupChoicesShouldChange: observer('intl.locale', 'resourceGroups', function() {
-    const intl    = get(this, 'intl');
-    const choices = get(this, 'resourceGroups').concat();
-
-    next(() => {
-      choices.unshift({
-        label: intl.t('clusterNew.aliyunkcs.resourceGroup.all'),
-        value: ''
-      });
-
-      set(this, 'resourceGroupChoices', choices);
-    })
-  }),
-
   clusterTypeChoices: computed('config.regionId', 'zoneChoices', function() {
     const region = REGIONS.findBy('value', get(this, 'config.regionId'));
 
@@ -786,6 +789,16 @@ export default Ember.Component.extend(ClusterDriver, {
 
     if (vswitches && get(this, 'config.vswitchId')) {
       return get(vswitches.findBy('value', get(this, 'config.vswitchId')), 'label');
+    } else {
+      return '';
+    }
+  }),
+
+  resourceGroupShowValue: computed('intl.locale', 'resourceGroupId', 'resourceGroupChoices.[]', function() {
+    const resourceGroupChoices = get(this, 'resourceGroupChoices');
+
+    if (resourceGroupChoices && get(this, 'resourceGroupId') !== null) {
+      return get(resourceGroupChoices.findBy('value', get(this, 'resourceGroupId')), 'label');
     } else {
       return '';
     }
