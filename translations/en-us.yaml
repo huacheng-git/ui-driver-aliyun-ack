@@ -62,10 +62,12 @@ clusterNew:
       label: VPC
       prompt: Choose VPC...
       required: VPC is required
+      default: Default VPC
     vswitchId:
       label: VSwitch
       prompt: Choose VSwitch...
       required: VSwitch is required
+      default: Default VSwitch
     proxyMode:
       label: Kube-Proxy Mode
     containerCidr:

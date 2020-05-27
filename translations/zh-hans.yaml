@@ -62,10 +62,12 @@ clusterNew:
       label: 专有网络
       prompt: 选择专有网络...
       required: 必须选择专有网络
+      default: 默认专有网络
     vswitchId:
       label: 交换机
       prompt: 选择交换机...
       required: 必须选择交换机
+      default: 默认交换机
     proxyMode:
       label: kube-proxy 代理模式
     containerCidr:
