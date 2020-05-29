@@ -29,22 +29,17 @@ const ENDPOINT = 'ecs.aliyuncs.com';
 const RESOURCE_GROUP_ENDPOINT = 'resourcemanager.aliyuncs.com';
 const VPC_ENDPOINT = 'vpc.aliyuncs.com';
 const PAGE_SIZE = 50;
-const K8S_1_12_6 = '1.12.6-aliyun.1';
-const K8S_1_16_6 = '1.16.6-aliyun.1';
+const K8S_1_16_9 = '1.16.9-aliyun.1';
 const K8S_1_14_8 = '1.14.8-aliyun.1';
 
 const VERSIONS = [
-  {
-    value: K8S_1_12_6,
-    label: K8S_1_12_6
-  },
   {
     value: K8S_1_14_8,
     label: K8S_1_14_8
   },
   {
-    value: K8S_1_16_6,
-    label: K8S_1_16_6
+    value: K8S_1_16_9,
+    label: K8S_1_16_9
   }
 ];
 const KUBERNETES = 'Kubernetes';
@@ -314,7 +309,7 @@ export default Ember.Component.extend(ClusterDriver, {
         addons:                   [{ name: 'flannel' }],
         clusterType:              KUBERNETES,
         containerCidr:            '172.20.0.0/16',
-        kubernetesVersion:        K8S_1_12_6,
+        kubernetesVersion:        K8S_1_16_9,
         proxyMode:                'ipvs',
         name:                     null,
         displayName:              null,
@@ -324,7 +319,6 @@ export default Ember.Component.extend(ClusterDriver, {
         nodeCidrMask:             '26',
         snatEntry:                true,
         endpointPublicAccess:     false,
-        publicSlb:                false,
         masterInstanceChargeType: 'PostPaid',
         masterPeriod:             '1',
         masterAutoRenew:          true,
@@ -373,7 +367,7 @@ export default Ember.Component.extend(ClusterDriver, {
   },
 
   actions: {
-    aliyunLogin(cb) {
+    async aliyunLogin(cb) {
       setProperties(this, {
         'errors':                 null,
         'config.accessKeyId':     (get(this, 'config.accessKeyId') || '').trim(),
@@ -401,50 +395,18 @@ export default Ember.Component.extend(ClusterDriver, {
         return;
       }
 
-      this.fetch('ResourceGroup', 'ResourceGroups').then(groups => {
-        set(this, 'resourceGroups', groups.map((group) => {
-          return {
-            label: `${ group.raw.DisplayName } (${ group.raw.Id })`,
-            value: group.raw.Id,
-            raw: group.raw
-          };
-        }));
+      try {
+        await all([this.fetchResourceGroups(), this.fetchRegions()]);
+        set(this, 'step', 2);
+        cb(true);
+        this.regionDidChange();
+      } catch (e) {
+        errors.push(get(e, 'body.Message') || e);
+        set(this, 'errors', errors);
+        cb();
 
-        this.fetch('Region', 'Regions').then((regions) => {
-          const transformRegions = [];
-
-          REGIONS.forEach((regionTemp) => {
-            const found = regions.findBy('value', get(regionTemp, 'value'));
-
-            if (found) {
-              transformRegions.pushObject({
-                ...regionTemp,
-                label: found.raw.LocalName
-              });
-            } else {
-              transformRegions.pushObject(regionTemp);
-            }
-          });
-
-          set(this, 'regionChoices', transformRegions);
-          set(this, 'step', 2);
-          cb(true);
-          this.regionDidChange();
-        }).catch((err) => {
-          let errors = get(this, 'errors') || [];
-
-          if (err.body && err.body.Message) {
-            errors.pushObject(err.body.Message);
-          } else {
-            errors.pushObject(err.message || err);
-          }
-          set(this, 'errors', errors);
-
-          cb();
-
-          return;
-        });
-      });
+        return;
+      }
     },
 
     configMaster(cb) {
@@ -572,7 +534,7 @@ export default Ember.Component.extend(ClusterDriver, {
     let choices = get(this, 'resourceGroups').concat();
 
     next(() => {
-      choices = choices.filter((item) => item.raw.Status === 'OK')
+      choices = choices.filter((item) => item.raw.Status === 'OK');
 
       choices.unshift({
         label: intl.t('clusterNew.aliyunkcs.resourceGroup.all'),
@@ -580,11 +542,15 @@ export default Ember.Component.extend(ClusterDriver, {
       });
 
       set(this, 'resourceGroupChoices', choices);
-    })
+    });
   }),
 
   resourceGroupIdDidChange: observer('resourceGroupId', function() {
     this.regionDidChange();
+  }),
+
+  regionChoicesShouldChange: observer('intl.locale', async function() {
+    await this.fetchRegions();
   }),
 
   regionDidChange: observer('config.regionId', function() {
@@ -688,6 +654,10 @@ export default Ember.Component.extend(ClusterDriver, {
     const intl = get(this, 'intl');
     let vpcs = get(this, 'vpcs');
 
+    if (vpcs === undefined) {
+      return;
+    }
+
     next(() => {
       vpcs = vpcs.map(vpc => {
         if (vpc.raw.IsDefault) {
@@ -724,6 +694,10 @@ export default Ember.Component.extend(ClusterDriver, {
     const intl = get(this, 'intl');
     let vswitches = get(this, 'vswitches');
 
+    if (vswitches === undefined) {
+      return;
+    }
+
     next(() => {
       vswitches = vswitches.map(vswitch => {
         if (vswitch.raw.IsDefault) {
@@ -735,7 +709,6 @@ export default Ember.Component.extend(ClusterDriver, {
           return vswitch;
         }
       });
-
       set(this, 'vswitches', vswitches);
     });
   }),
@@ -775,10 +748,6 @@ export default Ember.Component.extend(ClusterDriver, {
 
   workerSystemDiskDidChange: observer('config.workerSystemDiskCategory', function() {
     this.fetchAvailabelDataDisks();
-  }),
-
-  endpointPublicAccessDidChange: observer('config.endpointPublicAccess', function() {
-    set(this, 'config.publicSlb', get(this, 'config.endpointPublicAccess'));
   }),
 
   minNumOfNodes: computed('config.clusterType', function() {
@@ -924,7 +893,16 @@ export default Ember.Component.extend(ClusterDriver, {
   },
 
   setKeyPairs() {
-    this.fetch('KeyPair', 'KeyPairs', { RegionId: get(this, 'config.regionId') }).then((keyChoices) => {
+    const resourceGroupId = get(this, 'resourceGroupId');
+    const externalParams = {
+      RegionId: get(this, 'config.regionId'),
+    };
+
+    if (!!resourceGroupId && resourceGroupId !== '') {
+      externalParams.ResourceGroupId = resourceGroupId;
+    }
+
+    this.fetch('KeyPair', 'KeyPairs', externalParams).then((keyChoices) => {
       set(this, 'keyChoices', keyChoices.map((item) => {
         return {
           label: item.raw.KeyPairName,
@@ -939,6 +917,43 @@ export default Ember.Component.extend(ClusterDriver, {
 
       errors.pushObject(err.message || err);
       set(this, 'errors', errors);
+    });
+  },
+
+  async fetchResourceGroups() {
+    const groups = await this.fetch('ResourceGroup', 'ResourceGroups');
+    set(this, 'resourceGroups', groups.map((group) => {
+      return {
+        label: `${ group.raw.DisplayName } (${ group.raw.Id })`,
+        value: group.raw.Id,
+        raw: group.raw
+      };
+    }));
+  },
+
+  async fetchRegions() {
+    let AcceptLanguage = 'zh-CN';
+
+    if (get(this, 'intl.locale')[0] === 'en-us') {
+      AcceptLanguage = 'en-US';
+    };
+
+    const regions = await this.fetch('Region', 'Regions', { AcceptLanguage });
+    const transformRegions = [];
+
+    REGIONS.forEach((regionTemp) => {
+      const found = regions.findBy('value', get(regionTemp, 'value'));
+
+      if (found) {
+        transformRegions.pushObject({
+          ...regionTemp,
+          label: found.raw.LocalName
+        });
+      } else {
+        transformRegions.pushObject(regionTemp);
+      }
+
+      set(this, 'regionChoices', transformRegions);
     });
   },
 
