@@ -773,7 +773,7 @@ export default Ember.Component.extend(ClusterDriver, {
   workerDataDiskSizeDidChange: observer('config.workerDataDiskSize', function() {
     const size = get(this, 'config.workerDataDiskSize');
 
-    set(this, 'config.workerDataDisk', size === 0);
+    set(this, 'config.workerDataDisk', size === '0');
   }),
 
   minNumOfNodes: computed('config.clusterType', function() {
