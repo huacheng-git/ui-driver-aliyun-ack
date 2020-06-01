@@ -271,7 +271,6 @@ export default Ember.Component.extend(ClusterDriver, {
   systemDiskChoices:     [],
   dataDiskChoices:       [],
   proxyModeChoices:      MODES,
-  resourceGroupId:       '',
   resourceGroups:        null,
   storageDiskChoices:    null,
   sgChoices:             null,
@@ -332,6 +331,7 @@ export default Ember.Component.extend(ClusterDriver, {
         workerSystemDiskSize:     120,
         osType:                   'Linux',
         platform:                 'CentOS',
+        resourceGroupId:          '',
         workerSystemDiskCategory: 'cloud_efficiency',
         workerDataDiskSize:       120,
         workerDataDiskCategory:   'cloud_efficiency',
@@ -342,6 +342,8 @@ export default Ember.Component.extend(ClusterDriver, {
 
       set(this, 'cluster.%%DRIVERNAME%%EngineConfig', config);
       set(this, 'config', config);
+    } else {
+      set(this, 'vswitchId', get(this, 'config.masterVswitchIds')[0]);
     }
   },
   /*!!!!!!!!!!!DO NOT CHANGE END!!!!!!!!!!!*/
@@ -553,7 +555,7 @@ export default Ember.Component.extend(ClusterDriver, {
     });
   }),
 
-  resourceGroupIdDidChange: observer('resourceGroupId', function() {
+  resourceGroupIdDidChange: observer('config.resourceGroupId', function() {
     this.regionDidChange();
   }),
 
@@ -564,7 +566,7 @@ export default Ember.Component.extend(ClusterDriver, {
   regionDidChange: observer('config.regionId', function() {
     const intl = get(this, 'intl');
     const region = get(this, 'config.regionId');
-    const resourceGroupId = get(this, 'resourceGroupId');
+    const resourceGroupId = get(this, 'config.resourceGroupId');
     const externalParams = {
       RegionId: get(this, 'config.regionId'),
     };
@@ -617,7 +619,7 @@ export default Ember.Component.extend(ClusterDriver, {
   vpcDidChange: observer('config.vpcId', function() {
     const intl = get(this, 'intl');
     const vpcId = get(this, 'config.vpcId');
-    const resourceGroupId = get(this, 'resourceGroupId');
+    const resourceGroupId = get(this, 'config.resourceGroupId');
     const externalParams = {
       RegionId: get(this, 'config.regionId'),
       vpcId:    get(this, 'config.vpcId'),
@@ -773,7 +775,7 @@ export default Ember.Component.extend(ClusterDriver, {
   workerDataDiskSizeDidChange: observer('config.workerDataDiskSize', function() {
     const size = get(this, 'config.workerDataDiskSize');
 
-    set(this, 'config.workerDataDisk', size === '0');
+    set(this, 'config.workerDataDisk', size !== '0');
   }),
 
   minNumOfNodes: computed('config.clusterType', function() {
@@ -823,7 +825,7 @@ export default Ember.Component.extend(ClusterDriver, {
     return Math.pow(2, (32 - mask));
   }),
 
-  vpcShowValue: computed('intl.locale', 'config.vpcId', function() {
+  vpcShowValue: computed('intl.locale', 'config.vpcId', 'vpcs', function() {
     const vpcs = get(this, 'vpcs');
 
     if (vpcs && get(this, 'config.vpcId')) {
@@ -833,7 +835,7 @@ export default Ember.Component.extend(ClusterDriver, {
     }
   }),
 
-  vswitchShowValue: computed('intl.locale', 'vswitchId', function() {
+  vswitchShowValue: computed('intl.locale', 'vswitchId', 'vswitches', function() {
     const vswitches = get(this, 'vswitches');
 
     if (vswitches && get(this, 'vswitchId')) {
@@ -843,11 +845,11 @@ export default Ember.Component.extend(ClusterDriver, {
     }
   }),
 
-  resourceGroupShowValue: computed('intl.locale', 'resourceGroupId', 'resourceGroupChoices.[]', function() {
+  resourceGroupShowValue: computed('intl.locale', 'config.resourceGroupId', 'resourceGroupChoices.[]', function() {
     const resourceGroupChoices = get(this, 'resourceGroupChoices');
 
-    if (resourceGroupChoices && get(this, 'resourceGroupId') !== null) {
-      return get(resourceGroupChoices.findBy('value', get(this, 'resourceGroupId')), 'label');
+    if (resourceGroupChoices && get(this, 'config.resourceGroupId') !== null) {
+      return get(resourceGroupChoices.findBy('value', get(this, 'config.resourceGroupId')), 'label');
     } else {
       return '';
     }
@@ -919,7 +921,7 @@ export default Ember.Component.extend(ClusterDriver, {
   },
 
   setKeyPairs() {
-    const resourceGroupId = get(this, 'resourceGroupId');
+    const resourceGroupId = get(this, 'config.resourceGroupId');
     const externalParams = {
       RegionId: get(this, 'config.regionId'),
     };
