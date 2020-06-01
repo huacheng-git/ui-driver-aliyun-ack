@@ -279,6 +279,10 @@ export default Ember.Component.extend(ClusterDriver, {
   allSubnets:            null,
   allInstances:          null,
 
+  workerInstanceType:    '',
+  masterInstanceType:    '',
+  vswitchId:             '',
+
   editing:               equal('mode', 'edit'),
   isNew:                 equal('mode', 'new'),
 
@@ -325,14 +329,12 @@ export default Ember.Component.extend(ClusterDriver, {
         masterAutoRenewPeriod:    '1',
         masterSystemDiskSize:     120,
         masterSystemDiskCategory: 'cloud_efficiency',
-        masterInstanceType:       '',
         workerSystemDiskSize:     120,
         osType:                   'Linux',
         platform:                 'CentOS',
         workerSystemDiskCategory: 'cloud_efficiency',
         workerDataDiskSize:       120,
         workerDataDiskCategory:   'cloud_efficiency',
-        workerInstanceType:       '',
         numOfNodes:               3,
         workerDataDisk:           true,
         keyPair:                  null,
@@ -415,7 +417,7 @@ export default Ember.Component.extend(ClusterDriver, {
       const intl = get(this, 'intl');
 
       const vpcId = get(this, 'config.vpcId');
-      const vswitchId = get(this, 'config.vswitchId');
+      const vswitchId = get(this, 'vswitchId');
       const containerCidr = get(this, 'config.containerCidr');
       const serviceCidr = get(this, 'config.serviceCidr');
 
@@ -460,7 +462,7 @@ export default Ember.Component.extend(ClusterDriver, {
       const errors = [];
       const intl = get(this, 'intl');
 
-      const masterInstanceType = get(this, 'config.masterInstanceType');
+      const masterInstanceType = get(this, 'masterInstanceType');
 
       if ( !masterInstanceType && get(this, 'config.clusterType') === KUBERNETES ) {
         errors.push(intl.t('clusterNew.aliyunkcs.instanceType.required'));
@@ -493,7 +495,13 @@ export default Ember.Component.extend(ClusterDriver, {
 
       const keyPair = get(this, 'config.keyPair');
 
-      const workerInstanceType = get(this, 'config.workerInstanceType');
+      const workerInstanceType = get(this, 'workerInstanceType');
+
+      const clusterName = get(this, 'cluster.name');
+
+      if( !clusterName ) {
+        errors.push(intl.t('clusterNew.aliyunkcs.cluster.name.required'));
+      }
 
       if ( !workerInstanceType ) {
         errors.push(intl.t('clusterNew.aliyunkcs.instanceType.required'));
@@ -634,18 +642,18 @@ export default Ember.Component.extend(ClusterDriver, {
           };
         }));
 
-        const selectedVSwitch = get(this, 'config.vswitchId');
+        const selectedVSwitch = get(this, 'vswitchId');
 
         if (selectedVSwitch) {
           const found = vswitches.findBy('value', selectedVSwitch);
 
           if (!found) {
-            set(this, 'config.vswitchId', null);
+            set(this, 'vswitchId', null);
           }
         }
       });
     } else {
-      set(this, 'config.vswitchId', null);
+      set(this, 'vswitchId', null);
       set(this, 'vswitches', []);
     }
   }),
@@ -674,19 +682,25 @@ export default Ember.Component.extend(ClusterDriver, {
     });
   }),
 
-  vswitchDidChange: observer('vswitches.[]', 'config.vswitchId', function() {
-    const selectedVSwitch = get(this, 'config.vswitchId');
+  vswitchDidChange: observer('vswitches.[]', 'vswitchId', function() {
+    const selectedVSwitch = get(this, 'vswitchId');
 
     if (selectedVSwitch) {
       const found = get(this, 'vswitches').findBy('value', selectedVSwitch);
 
       if (!found) {
         set(this, 'config.zoneId', null);
+        set(this, 'config.masterVswitchIds', null);
+        set(this, 'config.workerVswitchIds', null);
       } else {
         set(this, 'config.zoneId', found.raw.ZoneId);
+        set(this, 'config.masterVswitchIds', [selectedVSwitch, selectedVSwitch, selectedVSwitch]);
+        set(this, 'config.workerVswitchIds', [selectedVSwitch]);
       }
     } else {
       set(this, 'config.zoneId', null);
+      set(this, 'config.masterVswitchIds', null);
+      set(this, 'config.workerVswitchIds', null);
     }
   }),
 
@@ -737,17 +751,29 @@ export default Ember.Component.extend(ClusterDriver, {
     set(this, 'config.osType', osType);
   }),
 
-  masterInstanceTypeDidChange: observer('config.masterInstanceType', function() {
+  masterInstanceTypeDidChange: observer('masterInstanceType', function() {
+    const type = get(this, 'masterInstanceType');
+
     this.fetchAvailableSystemDisks('master');
+    set(this, 'config.masterInstanceTypes', [type, type, type]);
   }),
 
-  workerInstanceTypeDidChange: observer('config.workerInstanceType', function() {
+  workerInstanceTypeDidChange: observer('workerInstanceType', function() {
+    const type = get(this, 'workerInstanceType');
+
     this.fetchAvailableSystemDisks('worker');
     this.fetchAvailabelDataDisks();
+    set(this, 'config.workerInstanceTypes', [type]);
   }),
 
   workerSystemDiskDidChange: observer('config.workerSystemDiskCategory', function() {
     this.fetchAvailabelDataDisks();
+  }),
+
+  workerDataDiskSizeDidChange: observer('config.workerDataDiskSize', function() {
+    const size = get(this, 'config.workerDataDiskSize');
+
+    set(this, 'config.workerDataDisk', size === 0);
   }),
 
   minNumOfNodes: computed('config.clusterType', function() {
@@ -807,11 +833,11 @@ export default Ember.Component.extend(ClusterDriver, {
     }
   }),
 
-  vswitchShowValue: computed('intl.locale', 'config.vswitchId', function() {
+  vswitchShowValue: computed('intl.locale', 'vswitchId', function() {
     const vswitches = get(this, 'vswitches');
 
-    if (vswitches && get(this, 'config.vswitchId')) {
-      return get(vswitches.findBy('value', get(this, 'config.vswitchId')), 'label');
+    if (vswitches && get(this, 'vswitchId')) {
+      return get(vswitches.findBy('value', get(this, 'vswitchId')), 'label');
     } else {
       return '';
     }
@@ -869,13 +895,13 @@ export default Ember.Component.extend(ClusterDriver, {
 
             let instanceType;
 
-            if ( (get(this, 'instanceChoices').findBy('value', get(this, `config.${ prefix }InstanceType`))) ) {
-              instanceType = get(this, `config.${ prefix }InstanceType`);
+            if ( (get(this, 'instanceChoices').findBy('value', get(this, `${ prefix }InstanceType`))) ) {
+              instanceType = get(this, `${ prefix }InstanceType`);
             } else {
               instanceType = get(this, 'instanceChoices.firstObject.value');
             }
 
-            set(this, `config.${ prefix }InstanceType`, instanceType);
+            set(this, `${ prefix }InstanceType`, instanceType);
             this.fetchAvailableSystemDisks(type).then(() => {
               resolve();
             });
@@ -984,7 +1010,7 @@ export default Ember.Component.extend(ClusterDriver, {
       this.fetch('', 'AvailableResource', {
         RegionId:             get(this, 'config.regionId'),
         ZoneId:               get(this, 'config.zoneId'),
-        InstanceType:         get(this, `config.${ prefix }InstanceType`),
+        InstanceType:         get(this, `${ prefix }InstanceType`),
         InstanceChargeType:   get(this, 'config.masterInstanceChargeType'),
         NetworkCategory:      'vpc',
         IoOptimized:          'optimized',
@@ -1023,7 +1049,7 @@ export default Ember.Component.extend(ClusterDriver, {
       this.fetch('', 'AvailableResource', {
         RegionId:             get(this, 'config.regionId'),
         ZoneId:               get(this, 'config.zoneId'),
-        InstanceType:         get(this, `config.workerInstanceType`),
+        InstanceType:         get(this, `workerInstanceType`),
         InstanceChargeType:   get(this, 'config.masterInstanceChargeType'),
         NetworkCategory:      'vpc',
         SystemDiskCategory:   get(this, 'config.workerSystemDiskCategory'),
@@ -1235,6 +1261,5 @@ export default Ember.Component.extend(ClusterDriver, {
       return `${ key }${ deep ? encodeURIComponent('=') : '=' }${ encodeURIComponent(params[key]) }`;
     }).join(deep ? encodeURIComponent('&') : '&');
   },
-
   // Any computed properties or custom logic can go here
 });

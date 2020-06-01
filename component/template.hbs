@@ -159,7 +159,7 @@
               {{new-select
                       classNames="form-control"
                       content=vswitches
-                      value=config.vswitchId
+                      value=vswitchId
                       prompt="clusterNew.aliyunkcs.vswitchId.prompt"
                       localizedPrompt=true
               }}
@@ -393,10 +393,10 @@
             {{#if (and (eq step 3) isNew)}}
               {{searchable-select class="form-control"
                                   content=instanceChoices
-                                  value=config.masterInstanceType
+                                  value=masterInstanceType
               }}
             {{else}}
-              <div>{{config.masterInstanceType}}</div>
+              <div>{{masterInstanceType}}</div>
             {{/if}}
           </div>
           <div class="col span-6">
@@ -469,10 +469,10 @@
             {{#if (and (eq step 4) isNew)}}
               {{searchable-select class="form-control"
                                   content=instanceChoices
-                                  value=config.workerInstanceType
+                                  value=workerInstanceType
               }}
             {{else}}
-              <div>{{config.workerInstanceType}}</div>
+              <div>{{workerInstanceType}}</div>
             {{/if}}
           </div>
           <div class="col span-6">
