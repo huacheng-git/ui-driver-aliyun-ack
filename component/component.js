@@ -34,12 +34,12 @@ const K8S_1_14_8 = '1.14.8-aliyun.1';
 
 const VERSIONS = [
   {
-    value: K8S_1_14_8,
-    label: K8S_1_14_8
-  },
-  {
     value: K8S_1_16_9,
     label: K8S_1_16_9
+  },
+  {
+    value: K8S_1_14_8,
+    label: K8S_1_14_8
   }
 ];
 const KUBERNETES = 'Kubernetes';
@@ -775,7 +775,11 @@ export default Ember.Component.extend(ClusterDriver, {
   workerDataDiskSizeDidChange: observer('config.workerDataDiskSize', function() {
     const size = get(this, 'config.workerDataDiskSize');
 
-    set(this, 'config.workerDataDisk', size !== '0');
+    if (size === '' || size === undefined) {
+      set(this, 'config.workerDataDisk', false);
+    }
+
+    set(this, 'config.workerDataDisk', parseInt(size) > 0);
   }),
 
   minNumOfNodes: computed('config.clusterType', function() {
