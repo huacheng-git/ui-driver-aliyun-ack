@@ -30,16 +30,16 @@ const RESOURCE_GROUP_ENDPOINT = 'resourcemanager.aliyuncs.com';
 const VPC_ENDPOINT = 'vpc.aliyuncs.com';
 const PAGE_SIZE = 50;
 const K8S_1_16_9 = '1.16.9-aliyun.1';
-const K8S_1_14_8 = '1.14.8-aliyun.1';
+const K8S_1_18_8 = '1.18.8-aliyun.1';
 
 const VERSIONS = [
   {
-    value: K8S_1_16_9,
-    label: K8S_1_16_9
+    value: K8S_1_18_8,
+    label: K8S_1_18_8
   },
   {
-    value: K8S_1_14_8,
-    label: K8S_1_14_8
+    value: K8S_1_16_9,
+    label: K8S_1_16_9
   }
 ];
 const KUBERNETES = 'Kubernetes';
@@ -312,7 +312,7 @@ export default Ember.Component.extend(ClusterDriver, {
         addons:                   [{ name: 'flannel' }],
         clusterType:              KUBERNETES,
         containerCidr:            '172.20.0.0/16',
-        kubernetesVersion:        K8S_1_16_9,
+        kubernetesVersion:        K8S_1_18_8,
         proxyMode:                'ipvs',
         name:                     null,
         displayName:              null,
