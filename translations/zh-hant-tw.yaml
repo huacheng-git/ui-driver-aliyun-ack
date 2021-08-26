@@ -1,0 +1,136 @@
+clusterNew:
+  aliyunkcs:
+    label: 阿里雲Kubernetes容器服務
+    shortLabel: Alibaba ACK
+    access:
+      next: '下一步: 配置集群'
+      loading: '從Alibaba ACK載入可用區域'
+      title: 帳戶訪問
+      detail: 選擇將用於啟動阿里巴巴Kubernetes服務的地區和API密鑰
+    clusterSelect:
+      title: 選擇集群
+      detail: 選擇要註冊的 ACK 集群
+      next: 註冊集群
+      importCluster: 集群
+      required: 必須設置需要導入的集群
+      placeholder: '請選擇'
+    cluster:
+      title: 集群配置
+      detail: 選擇將用於啟動阿里巴巴Kubernetes服務的區域和Kubernetes版本
+      next: '下一步: 配置Master節點'
+      loading: '從Alibaba載入可用區域'
+      name:
+        required: 集群名稱必須輸入
+    clusters:
+      k8s: 專有Kubernetes
+      managed: 託管Kubernetes
+      label: 集群類型
+    master:
+      title: Master 節點
+      detail: 配置用於啟動阿里巴巴Kubernetes服務的主節點
+      next: '下一步: 配置Worker節點'
+      loading: '從阿里巴巴載入密鑰對'
+    worker:
+      title: Worker 節點
+      detail: 配置用於啟動阿里巴巴Kubernetes服務的工作節點
+      required: Worker 節點必須配置
+    disk:
+      cloud: 普通雲盤
+      ephemeralSsd: 本地SSD盤
+      efficiency: 高效雲盤
+      ssd: SSD 雲盤
+      essd: ESSD 雲盤
+    rootSize:
+      label: 根磁碟大小
+      placeholder: '例如: 120'
+    rootType:
+      label: 根磁碟類型
+      required: 根磁碟類型必須配置
+    storageType:
+      label: 數據磁碟類型
+      required: 數據磁碟類型必須配置
+    storageSize:
+      label: 數據磁碟大小
+      placeholder: '例如: 120'
+    masterNum:
+      label: Master 節點數
+      help: 此Kubernetes集群將運行的Master節點數
+    nodePoolName:
+      label: 節點池名稱
+      placeholder: e.g. nodepool
+      required: 必須設置worker節點池名稱
+    numOfNodes:
+      label: Worker 節點數
+      placeholder: '例如: 3'
+      required: 必須設置Worker節點
+      help: 此Kubernetes集群將運行的Worker節點數
+    keyPair:
+      label: 密鑰對
+      required: 必須選擇密鑰對
+    resourceGroup:
+      label: 資源組
+      all: 賬號全部資源
+    region:
+      label: 區域
+    vpcId:
+      label: 專有網路
+      prompt: 選擇專有網路...
+      required: 必須選擇專有網路
+      default: 默認專有網路
+    vswitchId:
+      label: 交換機
+      prompt: 選擇交換機...
+      required: 必須選擇交換機
+      default: 默認交換機
+    proxyMode:
+      label: kube-proxy 代理模式
+    containerCidr:
+      label: Pod 網路 CIDR
+      required: 必須輸入Pod 網路 CIDR
+      invalid: Pod 網路 CIDR 網段格式不合法
+      placeholder: "請填寫有效的私有網段，即以下網段及其子網：10.0.0.0/8，172.16-31.0.0/12-16，192.168.0.0/16。不能與VPC及VPC內已有kubernetes集群使用的網段重複"
+    serviceCidr:
+      label: Service CIDR
+      required: 必須輸入Service CIDR
+      invalid: Service CIDR 網段不可選
+      placeholder: "可選範圍：10.0.0.0/16-24，172.16-31.0.0/16-24，192.168.0.0/16-24。不能與VPC及VPC內已有kubernetes集群使用的網段重複"
+    nodeCidrMask:
+      label: 節點 IP 數量
+    snatEntry:
+      label: 配置 SNAT
+      placeholder: 為專有網路配置 SNAT
+    endpointPublicAccess:
+      label: 公網訪問
+      placeholder: 使用 EIP 暴露 API Server
+    masterInstanceChargeType:
+      label: 付費類型
+      prePaid: 包年包月
+      postPaid: 按量付費
+    masterPeriod:
+      label: 購買時長
+      placeholder: 單位(月)
+    masterAutoRenew:
+      label: 自動續費
+      placeholder: 開啟
+    masterAutoRenewPeriod:
+      label: 自動續費時長
+      placeholder: 單位(月)
+    platform:
+      label: 操作系統
+    accessKeyId:
+      label: 訪問秘鑰
+      placeholder: 請輸入你的訪問秘鑰
+      required: 訪問秘鑰必須輸入
+    accessKeySecret:
+      label: 訪問秘鑰令牌
+      placeholder: 請輸入你的訪問秘鑰令牌
+      provided: Provided
+      required: 訪問秘鑰令牌必須輸入
+    version:
+      label: Kubernetes版本
+    zoneId:
+      label: 可用區域
+      required: 可用區域必須設置
+    instanceType:
+      label: 實例類型
+      required: 實例類型必須設置
