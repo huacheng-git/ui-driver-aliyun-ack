@@ -27,12 +27,12 @@ const defaultBase  = 1024;
 
 const PAGE_SIZE = 50;
 const K8S_1_18_8 = '1.18.8-aliyun.1';
-const K8S_1_20_4 = '1.20.4-aliyun.1';
+const K8S_1_20_11 = '1.20.11-aliyun.1';
 
 const VERSIONS = [
   {
-    value: K8S_1_20_4,
-    label: K8S_1_20_4
+    value: K8S_1_20_11,
+    label: K8S_1_20_11
   },
   {
     value: K8S_1_18_8,
@@ -329,7 +329,7 @@ export default Ember.Component.extend(ClusterDriver, {
           aliyun_credential_secret: '',
           cluster_id:               null,
           cluster_name:             null,
-          regionId:                 null,
+          regionId:                 'cn-beijing',
         });
       }else{
         config = this.get('globalStore').createRecord({
@@ -339,7 +339,7 @@ export default Ember.Component.extend(ClusterDriver, {
           addons:                   [{ name: 'flannel' }],
           clusterType:              KUBERNETES,
           containerCidr:            '172.20.0.0/16',
-          kubernetesVersion:        K8S_1_20_4,
+          kubernetesVersion:        K8S_1_20_11,
           proxyMode:                'ipvs',
           name:                     null,
           displayName:              null,
@@ -368,7 +368,7 @@ export default Ember.Component.extend(ClusterDriver, {
     } else {
       set(this, 'vswitchId', get(this, 'config.masterVswitchIds')[0]);
       get(this, 'config.masterInstanceTypes') && set(this, 'masterInstanceType', get(this, 'config.masterInstanceTypes')[0]);
-      set(this, 'nodePoolList', get(this, 'config.node_pool_list').map(item=>{
+      set(this, 'nodePoolList', (get(this, 'config.node_pool_list') || []).map(item=>{
         const dataDisk = get(item, 'data_disk.firstObject') || {};
 
         return {
@@ -661,6 +661,8 @@ export default Ember.Component.extend(ClusterDriver, {
 
     if(this.isImportProvider && region){
       this.fetchCluster();
+
+      return;
     }
     const intl = get(this, 'intl');
     const resourceGroupId = get(this, 'config.resourceGroupId');
