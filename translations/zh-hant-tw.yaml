@@ -3,28 +3,28 @@ clusterNew:
     label: 阿里雲Kubernetes容器服務
     shortLabel: Alibaba ACK
     access:
-      next: '下一步: 配置集群'
+      next: '下一步: 配置叢集'
       loading: '從Alibaba ACK載入可用區域'
       title: 帳戶訪問
       detail: 選擇將用於啟動阿里巴巴Kubernetes服務的地區和API密鑰
     clusterSelect:
-      title: 選擇集群
-      detail: 選擇要註冊的 ACK 集群
-      next: 註冊集群
-      importCluster: 集群
-      required: 必須設置需要導入的集群
+      title: 選擇叢集
+      detail: 選擇要註冊的 ACK 叢集
+      next: 註冊叢集
+      importCluster: 叢集
+      required: 必須設置需要導入的叢集
       placeholder: '請選擇'
     cluster:
-      title: 集群配置
+      title: 叢集配置
       detail: 選擇將用於啟動阿里巴巴Kubernetes服務的區域和Kubernetes版本
       next: '下一步: 配置Master節點'
       loading: '從Alibaba載入可用區域'
       name:
-        required: 集群名稱必須輸入
+        required: 叢集名稱必須輸入
     clusters:
       k8s: 專有Kubernetes
       managed: 託管Kubernetes
-      label: 集群類型
+      label: 叢集類型
     master:
       title: Master 節點
       detail: 配置用於啟動阿里巴巴Kubernetes服務的主節點
@@ -54,7 +54,7 @@ clusterNew:
       placeholder: '例如: 120'
     masterNum:
       label: Master 節點數
-      help: 此Kubernetes集群將運行的Master節點數
+      help: 此Kubernetes叢集將運行的Master節點數
     nodePoolName:
       label: 節點池名稱
       placeholder: e.g. nodepool
@@ -63,7 +63,7 @@ clusterNew:
       label: Worker 節點數
       placeholder: '例如: 3'
       required: 必須設置Worker節點
-      help: 此Kubernetes集群將運行的Worker節點數
+      help: 此Kubernetes叢集將運行的Worker節點數
     keyPair:
       label: 密鑰對
       required: 必須選擇密鑰對
@@ -88,12 +88,12 @@ clusterNew:
       label: Pod 網路 CIDR
       required: 必須輸入Pod 網路 CIDR
       invalid: Pod 網路 CIDR 網段格式不合法
-      placeholder: "請填寫有效的私有網段，即以下網段及其子網：10.0.0.0/8，172.16-31.0.0/12-16，192.168.0.0/16。不能與VPC及VPC內已有kubernetes集群使用的網段重複"
+      placeholder: "請填寫有效的私有網段，即以下網段及其子網：10.0.0.0/8，172.16-31.0.0/12-16，192.168.0.0/16。不能與VPC及VPC內已有kubernetes叢集使用的網段重複"
     serviceCidr:
       label: Service CIDR
       required: 必須輸入Service CIDR
       invalid: Service CIDR 網段不可選
-      placeholder: "可選範圍：10.0.0.0/16-24，172.16-31.0.0/16-24，192.168.0.0/16-24。不能與VPC及VPC內已有kubernetes集群使用的網段重複"
+      placeholder: "可選範圍：10.0.0.0/16-24，172.16-31.0.0/16-24，192.168.0.0/16-24。不能與VPC及VPC內已有kubernetes叢集使用的網段重複"
     nodeCidrMask:
       label: 節點 IP 數量
     snatEntry:
