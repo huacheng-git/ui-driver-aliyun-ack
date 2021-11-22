@@ -1,97 +1,53 @@
 <section class="horizontal-form">
   {{#accordion-list showExpandAll=false as | al expandFn |}}
-    {{#accordion-list-item 
-      title=(t "clusterNew.aliyunkcs.access.title")
-      detail=(t "clusterNew.aliyunkcs.access.detail")
-      expandAll=expandAll
-      expand=(action expandFn)
-      expandOnInit=true
+    {{#accordion-list-item title=(t "clusterNew.aliyunkcs.access.title")
+                           detail=(t "clusterNew.aliyunkcs.access.detail")
+                           expandAll=expandAll
+                           expand=(action expandFn)
+                           expandOnInit=true
     }}
-    {{#if (eq step 1)}}
-      {{form-auth-cloud-credential
-        cloudCredentials=cloudCredentials
-        driverName=driverName
-        parseAndCollectErrors=(action "errorHandler")
-        finishAndSelectCloudCredential=(action "finishAndSelectCloudCredential")
-        primaryResource=primaryResource
-        region=config.region
-        hideSave=true
-      }}
-    {{else}}
       <div class="row">
-        <div class="col span-4">
+        <div class="col span-6">
           <label class="acc-label">
-            {{t "formAuthCloudCredential.label"}}
+            {{t "clusterNew.aliyunkcs.accessKeyId.label"}}{{field-required}}
           </label>
-          <div>
-            {{selectedCloudCredential.displayName}}
-          </div>
+          {{#if (eq step 1)}}
+            {{input type="text"
+                    name="username"
+                    classNames="form-control"
+                    placeholder=(t "clusterNew.aliyunkcs.accessKeyId.placeholder")
+                    value=config.accessKeyId
+            }}
+          {{else}}
+            <div>{{config.accessKeyId}}</div>
+          {{/if}}
+        </div>
+        <div class="col span-6">
+          <label class="acc-label">
+            {{t "clusterNew.aliyunkcs.accessKeySecret.label"}}{{field-required}}
+          </label>
+          {{#if (eq step 1)}}
+            {{input
+                    type="password"
+                    name="password"
+                    classNames="form-control"
+                    placeholder=(t "clusterNew.aliyunkcs.accessKeySecret.placeholder")
+                    value=config.accessKeySecret
+            }}
+          {{else}}
+            <div class="text-muted text-italic">
+              {{t "clusterNew.aliyunkcs.accessKeySecret.provided"}}
+            </div>
+          {{/if}}
         </div>
       </div>
-    {{/if}}
     {{/accordion-list-item}}
-    {{#if isImportProvider}}
-      {{#if (gte step 1.5)}}
-        {{#accordion-list-item 
-          title=(t "clusterNew.aliyunkcs.clusterSelect.title")
-          detail=(t "clusterNew.aliyunkcs.clusterSelect.detail")
-          showExpand=false
-          expandOnInit=true
-          expandAll=al.expandAll
-          expand=(action expandFn)
-        }}
-          <div class="row">
-            <div class="col span-6">
-              <label class="acc-label">
-                {{t "clusterNew.aliyunkcs.region.label"}}
-              </label>
-              {{#input-or-display
-                editable=(and isNew (eq step 1.5))
-                value=showRegion
-              }}
-                {{new-select
-                  class="form-control"
-                  content=regionChoices
-                  value=config.regionId
-                }}
-              {{/input-or-display}}
-            </div>
-            <div class="col span-6">
-              <label class="acc-label">
-                {{t "clusterNew.aliyunkcs.clusterSelect.importCluster"}}
-              </label>
-              {{#input-or-display
-                editable=(and isNew (eq step 1.5))
-                value=showImportCluster
-              }}
-                {{new-select
-                  class="form-control"
-                  content=clusterChoices
-                  value=config.cluster_id
-                  disabled=(not (and clusterChoices clusterChoices.length))
-                  placeholder=(t "clusterNew.aliyunkcs.clusterSelect.placeholder")
-                }}
-              {{/input-or-display}}
-            </div>
-          </div>
-        {{/accordion-list-item }}
-      {{/if}}
-      {{#if (eq step 1.5)}}
-        {{save-cancel 
-          editing=(eq mode "edit")
-          save=(action "registerCluster")
-          cancel=close
-        }}
-      {{/if}}
-    {{/if}}
-    {{#if (and (eq step 1) )}}
-      {{save-cancel 
-        editing=(eq mode "edit")
-        save=(action "aliyunLogin")
-        cancel=close
-        createLabel="clusterNew.aliyunkcs.access.next"
-        savingLabel="clusterNew.aliyunkcs.access.loading"
-        saveDisabled=(or (not primaryResource.cloudCredentialId) (and (not isNew) (not isActive)))
+    {{#if (eq step 1)}}
+      {{save-cancel editing=(eq mode "edit")
+                    save=(action "aliyunLogin")
+                    cancel=close
+                    createLabel="clusterNew.aliyunkcs.access.next"
+                    savingLabel="clusterNew.aliyunkcs.access.loading"
       }}
     {{/if}}
     {{#if (gte step 2)}}
@@ -125,8 +81,8 @@
               {{t "clusterNew.aliyunkcs.region.label"}}
             </label>
             {{#input-or-display
-              editable=(and (and isNew (eq step 2)) (not isImportProvider))
-              value=showRegion
+                    editable=(and isNew (eq step 2))
+                    value=config.regionId
             }}
               {{new-select
                       class="form-control"
@@ -147,17 +103,15 @@
             <label class="acc-label">
               {{t "clusterNew.aliyunkcs.clusters.label"}}{{field-required}}
             </label>
-            {{#input-or-display
-              editable=(and (eq step 2) isNew)
-              value=(t showClusterType)
-            }}
-              {{new-select 
-                class="form-control"
-                content=clusterTypeChoices
-                value=config.clusterType
-                localizedLabel=true
+            {{#if (and (eq step 2) isNew)}}
+              {{new-select class="form-control"
+                           content=clusterTypeChoices
+                           value=config.clusterType
+                           localizedLabel=true
               }}
-            {{/input-or-display}}
+            {{else}}
+              <div>{{config.clusterType}}</div>
+            {{/if}}
           </div>
           <div class="col span-6">
             <label class="acc-label">
@@ -325,7 +279,6 @@
           </div>
         </div>
       {{/accordion-list-item}}
-      {{#if isNew}}
       {{#if (and (eq step 2) (eq config.clusterType "Kubernetes"))}}
         {{save-cancel editing=(eq mode "edit")
                       save=(action "configMaster")
@@ -341,8 +294,8 @@
                       savingLabel="clusterNew.aliyunkcs.master.loading"
         }}
       {{/if}}
-      {{/if}}
-      {{#if (and (or editing (gte step 3)) (eq config.clusterType "Kubernetes"))}}
+    {{/if}}
+    {{#if (and (gte step 3) (eq config.clusterType "Kubernetes"))}}
       {{#accordion-list-item title=(t "clusterNew.aliyunkcs.master.title")
                              detail=(t "clusterNew.aliyunkcs.master.detail")
                              showExpand=false
@@ -355,7 +308,7 @@
             <label class="acc-label">
               {{t "clusterNew.aliyunkcs.masterInstanceChargeType.label"}}{{field-required}}
             </label>
-            {{#input-or-display editable=(and (eq step 3) isNew) value=showMasterInstanceChargeType}}
+            {{#input-or-display editable=(and (eq step 3) isNew) value=config.masterInstanceChargeType}}
               {{new-select
                       classNames="form-control"
                       content=masterInstanceChargeTypeChoices
@@ -437,27 +390,20 @@
             <label class="acc-label">
               {{t "clusterNew.aliyunkcs.instanceType.label"}}{{field-required}}
             </label>
-            {{#input-or-display editable=(and (eq step 3) isNew) value=masterInstanceType}}
-              {{searchable-select 
-                class="form-control"
-                content=instanceChoices
-                value=masterInstanceType
+            {{#if (and (eq step 3) isNew)}}
+              {{searchable-select class="form-control"
+                                  content=instanceChoices
+                                  value=masterInstanceType
               }}
-            {{/input-or-display}}
+            {{else}}
+              <div>{{masterInstanceType}}</div>
+            {{/if}}
           </div>
           <div class="col span-6">
             <label class="acc-label">
               {{t "clusterNew.aliyunkcs.masterNum.label"}}
             </label>
-            {{#if (and (eq step 3) isNew)}}
-              {{new-select
-                classNames="form-control"
-                content=masterNumChoices
-                value=config.masterCount
-              }}
-            {{else}}
-              <div>{{config.masterCount}}</div>
-            {{/if}}
+            <div>3</div>
           </div>
         </div>
         <div class="row">
@@ -472,7 +418,7 @@
                                   value=config.masterSystemDiskCategory
               }}
             {{else}}
-              <div>{{displayMasterSystemDiskCategory}}</div>
+              <div>{{config.masterSystemDiskCategory}}</div>
             {{/if}}
           </div>
           <div class="col span-6">
@@ -507,208 +453,154 @@
         }}
       {{/if}}
     {{/if}}
-    {{#if (or editing (gte step 4))}}
-      {{#accordion-list-item 
-        title=(t "clusterNew.aliyunkcs.worker.title")
-        detail=(t "clusterNew.aliyunkcs.worker.detail")
-        showExpand=false
-        expandOnInit=true
-        expandAll=al.expandAll
-        expand=(action expandFn)
+    {{#if (gte step 4)}}
+      {{#accordion-list-item title=(t "clusterNew.aliyunkcs.worker.title")
+                             detail=(t "clusterNew.aliyunkcs.worker.detail")
+                             showExpand=false
+                             expandOnInit=true
+                             expandAll=al.expandAll
+                             expand=(action expandFn)
       }}
-        {{#each nodePoolList as |nodePool index|}}
-          <div class="box mb-10">
-            <div class="row">
-              <div class="col span-6">
-                <label class="acc-label">
-                  {{t "clusterNew.aliyunkcs.nodePoolName.label"}}{{field-required}}
-                </label>
-                {{#if (or (not nodePool.nodepool_id) isNew)}}
-                  {{input type="text"
-                    name="nodePoolName"
-                    classNames="form-control"
-                    placeholder=(t "clusterNew.aliyunkcs.nodePoolName.placeholder")
-                    disabled=(and isNew (eq nodePool.name 'default-nodepool'))
-                    value=nodePool.name
-                  }}
-                {{else}}
-                  <div>{{nodePool.name}}</div>
-                {{/if}}
-              </div>
-              <div class="pull-right">
-                <button
-                  style="background:transparent"
-                  class="btn bg-transparent text-small vertical-middle"
-                  type="button"
-                  disabled={{and (not index) (eq nodePool.name 'default-nodepool')}}
-                  {{action 'removeNodePool' nodePool}}
-                >
-                  {{t "nodeGroupRow.remove.label"}}
-                </button>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col span-6">
-                <label class="acc-label">
-                  {{t "clusterNew.aliyunkcs.instanceType.label"}}{{field-required}}
-                </label>
-                {{#if (or (not nodePool.nodepool_id) isNew)}}
-                  {{searchable-select 
-                    class="form-control"
-                    content=instanceChoices
-                    value=nodePool.instance_types
-                  }}
-                {{else}}
-                  <div>{{nodePool.instance_types}}</div>
-                {{/if}}
-              </div>
-              <div class="col span-6">
-                <label class="acc-label">
-                  {{t "clusterNew.aliyunkcs.numOfNodes.label"}}
-                </label>
-                {{input-integer
-                  min=minNumOfNodes
-                  max=300
-                  value=nodePool.instances_num
-                  classNames="form-control"
-                  placeholder=(t "clusterNew.aliyunkcs.numOfNodes.placeholder")
-                }}
-                <p class="help-block">
-                  {{t "clusterNew.aliyunkcs.numOfNodes.help"}}
-                </p>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col span-6">
-                <label class="acc-label">
-                  {{t "clusterNew.aliyunkcs.rootType.label"}}
-                </label>
-                {{#input-or-display
-                  editable=(or (not nodePool.nodepool_id) isNew)
-                  value=nodePool.displaySystemDiskCategory
-                }}
-                  {{searchable-select
-                    class="form-control"
-                    content=nodePool.systemDisk
-                    localizedLabel=true
-                    value=nodePool.system_disk_category
-                  }}
-                {{/input-or-display}}
-              </div>
-              <div class="col span-6">
-                <label class="acc-label">
-                  {{t "clusterNew.aliyunkcs.rootSize.label"}}
-                </label>
-                {{#if (or (not nodePool.nodepool_id) isNew)}}
-                  <div class="input-group">
-                    {{input-integer
-                      min=40
-                      max=500
-                      value=nodePool.system_disk_size
+        <div class="row">
+          <div class="col span-6">
+            <label class="acc-label">
+              {{t "clusterNew.aliyunkcs.instanceType.label"}}{{field-required}}
+            </label>
+            {{#if (and (eq step 4) isNew)}}
+              {{searchable-select class="form-control"
+                                  content=instanceChoices
+                                  value=workerInstanceType
+              }}
+            {{else}}
+              <div>{{workerInstanceType}}</div>
+            {{/if}}
+          </div>
+          <div class="col span-6">
+            <label class="acc-label">
+              {{t "clusterNew.aliyunkcs.numOfNodes.label"}}
+            </label>
+            {{#if (eq step 4)}}
+              {{input-integer
+                      min=minNumOfNodes
+                      max=300
+                      value=config.numOfNodes
                       classNames="form-control"
-                      placeholder=(t "clusterNew.aliyunkcs.rootSize.placeholder")
-                    }}
-                    <span class="input-group-addon bg-default">
-                      {{t "generic.gigabyte"}}
-                    </span>
-                  </div>
-                {{else}}
-                  <div>{{nodePool.system_disk_size}} {{t "generic.gigabyte"}}</div>
-                {{/if}}
-              </div>
-            </div>
-            {{#unless (eq nodePool.name 'default-nodepool')}}
-              <div class="row">
-                <div class="col span-6">
-                  <label class="acc-label">
-                    {{t "clusterNew.aliyunkcs.storageType.label"}}
-                  </label>
-                  {{#input-or-display
-                    editable=(or (not nodePool.nodepool_id) isNew)
-                    value=nodePool.displayCategory
-                  }}
-                    {{searchable-select
+                      placeholder=(t "clusterNew.aliyunkcs.numOfNodes.placeholder")
+              }}
+              <p class="help-block">
+                {{t "clusterNew.aliyunkcs.numOfNodes.help"}}
+              </p>
+            {{else}}
+              <div>{{config.numOfNodes}}</div>
+            {{/if}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col span-6">
+            <label class="acc-label">
+              {{t "clusterNew.aliyunkcs.rootType.label"}}
+            </label>
+            {{#input-or-display
+                    editable=isNew
+                    value=config.workerSystemDiskCategory
+            }}
+              {{searchable-select
                       class="form-control"
-                      content=nodePool.dataDisk
+                      content=systemDiskChoices
                       localizedLabel=true
-                      value=nodePool.category
-                    }}
-                  {{/input-or-display}}
-                </div>
-                <div class="col span-6">
-                  <label class="acc-label">
-                    {{t "clusterNew.aliyunkcs.storageSize.label"}}
-                  </label>
-                    <div class="input-group">
-                      {{#input-or-display
-                        editable=(or (not nodePool.nodepool_id) isNew)
-                        value=nodePool.size
-                      }}
-                        {{input-integer
-                          min=0
-                          max=32768
-                          value=nodePool.size
-                          classNames="form-control"
-                          placeholder=(t "clusterNew.aliyunkcs.rootSize.placeholder")
-                        }}
-                      {{/input-or-display}}
-                      <span class="input-group-addon bg-default">
-                        {{t "generic.gigabyte"}}
-                      </span>
-                    </div>
-                </div>
-              </div>
-            {{/unless}}
-            <div class="row">
-              <div class="col span-6">
-                <label class="acc-label">
-                  {{t "clusterNew.aliyunkcs.platform.label"}}{{field-required}}
-                </label>
-                {{#input-or-display editable=(or (not nodePool.nodepool_id) isNew) value=nodePool.platform}}
-                  {{new-select
-                    classNames="form-control"
-                    content=platformChoices
-                    value=nodePool.platform
-                  }}
-                {{/input-or-display}}
-              </div>
-              <div class="col span-6">
-                <label class="acc-label">
-                  {{t "clusterNew.aliyunkcs.keyPair.label"}}{{field-required}}
-                </label>
-                {{#input-or-display
-                  editable=(or (not nodePool.nodepool_id) isNew)
-                  value=nodePool.key_pair
+                      value=config.workerSystemDiskCategory
+              }}
+            {{/input-or-display}}
+          </div>
+          <div class="col span-6">
+            <label class="acc-label">
+              {{t "clusterNew.aliyunkcs.rootSize.label"}}
+            </label>
+            {{#if isNew}}
+              <div class="input-group">
+                {{input-integer
+                        min=40
+                        max=500
+                        value=config.workerSystemDiskSize
+                        classNames="form-control"
+                        placeholder=(t "clusterNew.aliyunkcs.rootSize.placeholder")
                 }}
-                  {{new-select
-                    class="form-control"
-                    content=keyChoices
-                    value=nodePool.key_pair
-                  }}
-                {{/input-or-display}}
+                <span class="input-group-addon bg-default">
+                  {{t "generic.gigabyte"}}
+                </span>
               </div>
-            </div>
+            {{else}}
+              <div>{{config.workerSystemDiskSize}} {{t "generic.gigabyte"}}</div>
+            {{/if}}
           </div>
-        {{else}}
-          <div class="p-20">
-            {{t "clusterNew.amazoneks.nodeGroups.noNodes"}}
+        </div>
+        <div class="row">
+          <div class="col span-6">
+            <label class="acc-label">
+              {{t "clusterNew.aliyunkcs.storageType.label"}}
+            </label>
+            {{#input-or-display
+                    editable=isNew
+                    value=config.workerDataDiskCategory
+            }}
+              {{searchable-select
+                      class="form-control"
+                      content=dataDiskChoices
+                      localizedLabel=true
+                      value=config.workerDataDiskCategory
+              }}
+            {{/input-or-display}}
           </div>
-        {{/each}}
-
-        <div class="row mt-15">
-          <button
-            class="btn bg-link icon-btn pull-left"
-            type="button"
-            disabled={{not instanceChoices.length}}
-            {{action "addNodePool"}}
-          >
-            <span class="darken">
-              <i class="icon icon-plus text-small"></i>
-            </span>
-            <span>
-              {{t "clusterNew.amazoneks.nodeGroups.addLabel"}}
-            </span>
-          </button>
+          <div class="col span-6">
+            <label class="acc-label">
+              {{t "clusterNew.aliyunkcs.storageSize.label"}}
+            </label>
+            {{#if isNew}}
+              <div class="input-group">
+                {{input-integer
+                        min=0
+                        max=32768
+                        value=config.workerDataDiskSize
+                        classNames="form-control"
+                        placeholder=(t "clusterNew.aliyunkcs.rootSize.placeholder")
+                }}
+                <span class="input-group-addon bg-default">
+                  {{t "generic.gigabyte"}}
+                </span>
+              </div>
+            {{else}}
+              <div>{{config.workerDataDiskSize}} {{t "generic.gigabyte"}}</div>
+            {{/if}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col span-6">
+            <label class="acc-label">
+              {{t "clusterNew.aliyunkcs.platform.label"}}{{field-required}}
+            </label>
+            {{#input-or-display editable=(and (eq step 4) isNew) value=config.platform}}
+              {{new-select
+                      classNames="form-control"
+                      content=platformChoices
+                      value=config.platform
+              }}
+            {{/input-or-display}}
+          </div>
+          <div class="col span-6">
+            <label class="acc-label">
+              {{t "clusterNew.aliyunkcs.keyPair.label"}}{{field-required}}
+            </label>
+            {{#input-or-display
+                    editable=isNew
+                    value=config.keyPair
+            }}
+              {{new-select
+                      class="form-control"
+                      content=keyChoices
+                      value=config.keyPair
+              }}
+            {{/input-or-display}}
+          </div>
         </div>
       {{/accordion-list-item}}
       {{#if (eq step 4)}}
@@ -717,7 +609,6 @@
                       cancel=close
         }}
       {{/if}}
-    {{/if}}
     {{/if}}
     {{top-errors errors=errors}}
     {{top-errors errors=otherErrors}}
