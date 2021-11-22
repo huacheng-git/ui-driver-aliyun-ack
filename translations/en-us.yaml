@@ -7,13 +7,6 @@ clusterNew:
       loading: "Loading Zones from Alibaba ACK"
       title: Account Access
       detail: Choose the region and API Key that will be used to launch Alibaba Kubernetes Service
-    clusterSelect:
-      title: Select Cluster
-      detail: Select the ACK cluster you want to register
-      next: Register Cluster
-      importCluster: Cluster
-      required: Import Cluster is required
-      placeholder: 'Choose'
     cluster:
       title: Cluster Configuration
       detail: Choose the Zone and Kubernetes version that will be used to launch Alibaba Kubernetes Service
@@ -33,7 +26,6 @@ clusterNew:
     worker:
       title: Worker Nodes
       detail: Configure the worker nodes that will be used to launch Alibaba Kubernetes Service
-      required: Worker Nodes is required
     disk:
       cloud: Ordinary Disk
       ephemeralSsd: Local SSD Disk
@@ -45,20 +37,14 @@ clusterNew:
       placeholder: e.g. 120
     rootType:
       label: Root Disk Type
-      required: Root Disk Type is required
     storageType:
       label: Data Disk Type
-      required: Data Disk Type is required
     storageSize:
       label: Data Disk Size
       placeholder: e.g. 120
     masterNum:
       label: Master Nodes Count
       help: The count of master nodes will be launched in this Kubernetes cluster
-    nodePoolName:
-      label: Nood Pool Name
-      placeholder: e.g. nodepool
-      required: Worker Node Name is required
     numOfNodes:
       label: Worker Nodes Count
       placeholder: e.g. 3
