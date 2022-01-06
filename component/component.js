@@ -1038,7 +1038,7 @@ export default Ember.Component.extend(ClusterDriver, {
           const found = get(this, 'systemDiskChoices').findBy('value', selectedDisk);
 
           if (!found) {
-            set(this, `config.${ prefix }SystemDiskCategory`, null);
+            set(this, `config.${ prefix }SystemDiskCategory`, get(this, 'systemDiskChoices.firstObject.value') || null);
           }
         }
         resolve(results);
@@ -1080,7 +1080,7 @@ export default Ember.Component.extend(ClusterDriver, {
           const found = get(this, 'dataDiskChoices').findBy('value', selectedDisk);
 
           if (!found) {
-            set(this, 'config.workerDataDiskCategory', null);
+            set(this, 'config.workerDataDiskCategory', get(this, 'dataDiskChoices.firstObject.value') || null);
           }
         }
 
