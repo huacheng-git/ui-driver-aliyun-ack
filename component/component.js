@@ -1112,30 +1112,26 @@ export default Ember.Component.extend(ClusterDriver, {
     const containerCidr = get(this, 'config.containerCidr');
     const segment = containerCidr.split('/')[0];
     const subnet  = containerCidr.split('/')[1];
-
-    if (segment === '10.0.0.0') {
-      return (parseInt(subnet) >= 7 && parseInt(subnet) <= 22);
-    }
-
-    if (segment === '192.168.0.0') {
-      return (parseInt(subnet) >= 13 && parseInt(subnet) <= 22);
-    }
-
     const segmentSplit = segment.split('.');
+
+    if (segmentSplit[0] === '10') {
+      return (parseInt(subnet) >= 8 && parseInt(subnet) <= 32);
+    }
+
+    if (segmentSplit[0] === '192' && segmentSplit[1] === '168') {
+      return (parseInt(subnet) >= 16 && parseInt(subnet) <= 32);
+    }
 
     if (segmentSplit[0] === '172') {
       if (!(parseInt(segmentSplit[1]) >= 16 && parseInt(segmentSplit[1]) <= 31)) {
         return false;
       }
-      if (!(segmentSplit[2] === '0' && segmentSplit[3] === '0')) {
+
+      if (!(parseInt(subnet) >= 12 && parseInt(subnet) <= 16)) {
         return false;
       }
-      if (segmentSplit[1] === '16' && (parseInt(subnet) >= 12 && parseInt(subnet) <= 22)) {
-        return true;
-      }
-      if (parseInt(segmentSplit[1]) > 16 && (parseInt(subnet) >= 16 && parseInt(subnet) <= 22)) {
-        return true;
-      }
+
+      return true;
     }
 
     return false;
@@ -1145,24 +1141,26 @@ export default Ember.Component.extend(ClusterDriver, {
     const containerCidr = get(this, 'config.serviceCidr');
     const segment = containerCidr.split('/')[0];
     const subnet  = containerCidr.split('/')[1];
-
-    if (segment === '10.0.0.0') {
-      return (parseInt(subnet) >= 16 && parseInt(subnet) <= 24);
-    }
-
-    if (segment === '192.168.0.0') {
-      return (parseInt(subnet) >= 16 && parseInt(subnet) <= 24);
-    }
-
     const segmentSplit = segment.split('.');
+
+    if (segmentSplit[0] === '10') {
+      return (parseInt(subnet) >= 16 && parseInt(subnet) <= 24);
+    }
+
+    if (segmentSplit[0] === '192' && segmentSplit[1] === '168') {
+      return (parseInt(subnet) >= 16 && parseInt(subnet) <= 24);
+    }
 
     if (segmentSplit[0] === '172') {
       if (!(parseInt(segmentSplit[1]) >= 16 && parseInt(segmentSplit[1]) <= 31)) {
         return false;
       }
-      if (parseInt(subnet) >= 16 && parseInt(subnet) <= 24) {
-        return true;
+
+      if (!(parseInt(subnet) >= 16 && parseInt(subnet) <= 24)) {
+        return false;
       }
+
+      return true;
     }
 
     return false;
