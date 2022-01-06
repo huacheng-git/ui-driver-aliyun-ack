@@ -748,9 +748,9 @@ export default Ember.Component.extend(ClusterDriver, {
   }),
 
   platformTypeDidChange: observer('config.platform', function() {
-    const osType = get(this, 'platformChoices').find((item) => item.value === get(this, 'config.platform'));
+    const platform = get(this, 'platformChoices').find((item) => item.value === get(this, 'config.platform')) || {};
 
-    set(this, 'config.osType', osType);
+    set(this, 'config.osType', platform.osType || 'Linux');
   }),
 
   masterInstanceTypeDidChange: observer('masterInstanceType', function() {
