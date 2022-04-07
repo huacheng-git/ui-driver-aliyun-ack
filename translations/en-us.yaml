@@ -114,6 +114,7 @@ clusterNew:
       required: Secret Key is required
     version:
       label: Kubernetes Version
+      warning: “{version}”，Ali Cloud is not supported in this version. If you continue to deploy it, cluster deployment will fail. Please upgrade rancher.
     zoneId:
       label: Availability Zone
       required: Availability Zone is required

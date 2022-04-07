@@ -128,6 +128,7 @@ clusterNew:
       required: 訪問秘鑰令牌必須輸入
     version:
       label: Kubernetes版本
+      warning: “{version}”，此版本阿里雲不在支持，如果繼續部署將會導致集群部署失敗。請升級rancher版本。
     zoneId:
       label: 可用區域
       required: 可用區域必須設置
