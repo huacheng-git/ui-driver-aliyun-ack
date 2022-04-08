@@ -128,7 +128,9 @@ clusterNew:
       required: 訪問秘鑰令牌必須輸入
     version:
       label: Kubernetes版本
-      warning: “{version}”，此版本阿里雲不在支持，如果繼續部署將會導致集群部署失敗。請升級rancher版本。
+      warningAliyun: “{version}”，此版本阿里雲不在支持，如果繼續部署將會導致集群部署失敗。請升級 Rancher 版本。
+      warningRacher: “{version}”，此版本不在 Rancher 支持矩陣範圍內，請升級 Rancher 版本。可參考
+      warningRancherTip: Rancher 支持矩陣。
     zoneId:
       label: 可用區域
       required: 可用區域必須設置
